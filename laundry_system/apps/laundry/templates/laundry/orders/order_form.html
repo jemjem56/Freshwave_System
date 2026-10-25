@@ -1,0 +1,112 @@
+{% extends 'laundry/base.html' %}
+{% block title %}New Order - FreshWave{% endblock %}
+{% block page_title %}New Order{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div class="d-flex align-items-center gap-3">
+        <a href="{% url 'order_list' %}" class="btn btn-secondary btn-sm"><i class="bi bi-arrow-left"></i></a>
+        <h2>Create New Order</h2>
+    </div>
+</div>
+
+<form method="post" id="orderForm" novalidate>
+{% csrf_token %}
+<div class="row g-3">
+    <!-- Left: Customer + Details -->
+    <div class="col-lg-5">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0" style="font-size:15px;font-weight:700;color:var(--text);"><i class="bi bi-person me-2" style="color:var(--accent);"></i>Customer</h5>
+            </div>
+            <div class="card-body">
+                <label class="form-label">Select Customer <span style="color:var(--danger);">*</span></label>
+                {{ order_form.customer }}
+                <a href="{% url 'customer_create' %}" class="btn btn-secondary btn-sm mt-2 w-100">
+                    <i class="bi bi-person-plus me-1"></i>Add New Customer
+                </a>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0" style="font-size:15px;font-weight:700;color:var(--text);"><i class="bi bi-info-circle me-2" style="color:var(--accent2);"></i>Order Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label" required>Total Weight (kg) <span style="color:var(--danger);">*</span></label>
+                    {{ order_form.weight_kg }}
+                    <div style="font-size:12px;color:var(--text-muted);margin-top:4px;" id="weightHelpText">Used for per-kg pricing calculation</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Pickup Date & Time</label>
+                    {{ order_form.pickup_date }}
+                </div>
+                <div>
+                    <label class="form-label">Special Notes</label>
+                    {{ order_form.notes }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="total-box" id="summaryBox">
+            <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text);margin-bottom:10px;">Order Summary</div>
+            <div id="summaryItems" style="min-height:40px;font-size:13px;color:var(--text-muted);">
+                Select services to see summary...
+            </div>
+            <hr class="divider">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-weight:600;">Total</span>
+                <span class="price-tag" id="totalDisplay" style="font-size:22px;">₱0.00</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right: Services -->
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0" style="font-size:15px;font-weight:700;color:var(--text);">Select Services</h5>
+                <p style="color:var(--text-muted);font-size:12px;margin-top:4px;margin-bottom:0;">Choose one or more services. Price is calculated per kg.</p>
+            </div>
+            <div class="card-body">
+                <div class="row g-2" id="servicesGrid">
+                {% for service in services %}
+                <div class="col-md-6" id="wrapper_{{ service.id }}">
+                    <input type="checkbox" name="service_{{ service.id }}" id="svc_{{ service.id }}" style="display:none;" data-price="{{ service.price }}"
+                        data-name="{{ service.get_name_display }}" data-id="{{ service.id }}" data-package="{{ service.is_package|yesno:'true,false' }}"
+                        class="service-checkbox">
+                    <div class="service-card" id="card_{{ service.id }}"
+                        onclick="toggleService('{{ service.id }}')">
+                        <div style="font-weight:700;font-size:14px;margin-bottom:2px;color:var(--text);">
+                            {{ service.get_name_display }}
+                            {% if service.is_package %}
+                            <span style="background:rgba(226, 226, 225, 0.13);color:var(--text);border:1px solid rgba(21, 20, 19, 0.7);font-size:10px;padding:2px 7px;border-radius:5px;margin-left:6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Promo Package</span>
+                            {% endif %}
+                        </div>
+                        {% if service.description %}
+                        <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px;">{{ service.description }}</div>
+                        {% endif %}
+                        <div class="price-tag">₱{{ service.price }}{% if not service.is_package %}/kg{% endif %}</div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-4" style="color:var(--text-muted);">
+                    No services configured. Please add services in the admin panel.
+                </div>
+                {% endfor %}
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary" id="submitBtn">
+                        <i class="bi bi-bag-plus me-1"></i>Create Order
+                    </button>
+                    <a href="{% url 'order_list' %}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</form>
+{% endblock %}
+

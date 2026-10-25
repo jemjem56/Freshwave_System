@@ -1,0 +1,116 @@
+{% extends 'laundry/base.html' %}
+{% block title %}Payments - FreshWave{% endblock %}
+{% block page_title %}Payments{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Payment Records</h2>
+        <p style="color:var(--text-muted);font-size:14px;margin-top:2px;">{{ payments.count }} transaction{{ payments.count|pluralize }}</p>
+    </div>
+    <form method="get" class="d-flex gap-2 align-items-center">
+        <div>
+            <input type="date" name="date" value="{{ date_filter }}" class="form-control" onchange="this.form.submit()">
+        </div>
+        {% if date_filter %}<a href="{% url 'payment_list' %}" class="btn btn-secondary"><i class="bi bi-x"></i> Clear</a>{% endif %}
+    </form>
+</div>
+
+<!-- Summary cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon green"><i class="bi bi-currency-exchange"></i></div>
+            <div class="stat-value">₱{{ total|floatformat:2 }}</div>
+            <div class="stat-label">{% if date_filter %}Selected Day{% else %}All Time{% endif %} Revenue</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon cyan"><i class="bi bi-receipt"></i></div>
+            <div class="stat-value">{{ payments.count }}</div>
+            <div class="stat-label">Transactions</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon purple"><i class="bi bi-wallet2"></i></div>
+            <div class="stat-value">
+                {% if payments.count > 0 %}
+                ₱{% widthratio total payments.count 1 %}
+                {% else %}₱0{% endif %}
+            </div>
+            <div class="stat-label">Avg. Transaction</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Customer</th>
+                    <th>Amount</th>
+                    <th class="d-none d-md-table-cell">Method</th>
+                    <th class="d-none d-md-table-cell">Reference</th>
+                    <th>Status</th>
+                    <th class="d-none d-md-table-cell" style="padding-left:40px;">Date & Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in payments %}
+                <tr style="cursor:pointer;" onclick="window.location='/orders/{{ payment.order.order_number }}/'">
+                    <td>
+                        <span style="color:var(--accent);font-weight:700;">#{{ payment.order.order_number }}</span>
+                    </td>
+                    <td>
+                        <div style="font-weight:600;">{{ payment.order.customer.name }}</div>
+                        <div class="d-md-none" style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ payment.paid_at|date:"M d, Y g:i A" }}</div>
+                    </td>
+                    <td>
+                        <span style="font-family:var(--font-system);font-weight:700;font-size:16px;color:var(--accent);">₱{{ payment.amount|floatformat:2 }}</span>
+                    </td>
+                    <td class="d-none d-md-table-cell">
+                        <div style="display:flex;align-items:center;gap:6px;font-size:13px;">
+                            {% if payment.method == 'cash' %}
+                            {% elif payment.method == 'gcash' %}
+                            {% elif payment.method == 'maya' %}
+                            {% else %}{% endif %}
+                            {{ payment.get_method_display }}
+                        </div>
+                    </td>
+                    <td class="d-none d-md-table-cell" style="color:var(--text-muted);font-size:13px;">{{ payment.reference_no|default:"—" }}</td>
+                    <td>
+                        {% if payment.order.is_paid %}
+                            <span style="color:#04a712bf;font-size:12px;font-weight:600;">
+                                <i class="bi bi-check-circle me-1"></i>Paid
+                            </span>
+                        {% elif payment.order.amount_paid > 0 %}
+                            <span style="color:#fbbf24;font-size:12px;font-weight:600;">
+                                <i class="bi bi-exclamation-circle me-1"></i>Partial
+                            </span>
+                        {% else %}
+                            <span style="color:var(--danger);font-size:12px;font-weight:600;">
+                                <i class="bi bi-x-circle me-1"></i>Unpaid
+                            </span>
+                        {% endif %}
+                    </td>                    
+                    <td class="d-none d-md-table-cell" style="color:var(--text-muted);font-size:13px;">{{ payment.paid_at|date:"M d, Y g:i A" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-5" style="color:var(--text-muted);">
+                        <i class="bi bi-credit-card" style="font-size:40px;display:block;margin-bottom:12px;opacity:.4;"></i>
+                        <div style="font-size:16px;font-weight:600;">No payments found</div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

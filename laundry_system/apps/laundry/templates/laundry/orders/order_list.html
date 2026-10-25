@@ -1,0 +1,116 @@
+{% extends 'laundry/base.html' %}
+{% block title %}Orders - FreshWave{% endblock %}
+{% block page_title %}Orders{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <p style="color:var(--text-muted);font-size:14px;margin-top:2px;">{{ orders.count }} order{{ orders.count|pluralize }} found</p>
+    </div>
+    <div class="d-flex gap-2 flex-wrap align-items-center">
+        <form method="get" class="d-flex gap-2 align-items-center">
+            <div class="search-box position-relative">
+                <i class="bi bi-search"></i>
+                <input type="text" id="orderSearchInput" name="q" value="{{ query }}" class="form-control"
+                    placeholder="Search customer or order number..." list="orderCustomerSuggestions" autocomplete="off">
+                <div id="orderSearchSuggestions" class="autocomplete-dropdown d-none"></div>
+            </div>
+            {{ all_customer_names|json_script:"order-customer-names-data" }}
+            <div class="filter-group">
+                <div class="status-dropdown">
+                    <button type="button" class="status-trigger" id="statusToggle">
+                        <span id="selectedStatus">{% if status_filter %} {{ status_filter }}
+                        {% else %} All Status {% endif %}</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    <div class="status-menu" id="statusMenu">
+                        <button type="button" data-value="">All Status</button>
+                        {% for val, label in status_choices %}
+                        <button type="button" data-value="{{ val }}">{{ label }} </button>{% endfor %}
+                    </div>
+                    <input type="hidden" name="status" id="statusInput" value="{{ status_filter }}">
+                </div>
+                {% if query or status_filter %}
+                <a href="{% url 'order_list' %}" class="filter-clear-btn">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+                {% endif %}
+            </div>
+        </form>
+        <a href="{% url 'order_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus me-1"></i>New Order</a>
+    </div>
+</div>
+
+<!-- Status filter tabs -->
+<div class="d-flex gap-2 mb-3 flex-wrap">
+    <a href="{% url 'order_list' %}" class="btn btn-sm {% if not status_filter %}btn-primary{% else %}btn-secondary{% endif %}">All</a>
+    <a href="?status=received" class="btn btn-sm {% if status_filter == 'received' %}btn-primary{% else %}btn-secondary{% endif %}">Received</a>
+    <a href="?status=washing" class="btn btn-sm {% if status_filter == 'washing' %}btn-primary{% else %}btn-secondary{% endif %}">Washing</a>
+    <a href="?status=drying" class="btn btn-sm {% if status_filter == 'drying' %}btn-primary{% else %}btn-secondary{% endif %}">Drying</a>
+    <a href="?status=folding" class="btn btn-sm {% if status_filter == 'folding' %}btn-primary{% else %}btn-secondary{% endif %}">Folding</a>
+    <a href="?status=ready" class="btn btn-sm {% if status_filter == 'ready' %}btn-primary{% else %}btn-secondary{% endif %}" style="{% if status_filter == 'ready' %}{% else %}border-color:rgba(16,185,129,.3);color:#34d399;{% endif %}">Ready for Pickup</a>
+    <a href="?status=completed" class="btn btn-sm {% if status_filter == 'completed' %}btn-primary{% else %}btn-secondary{% endif %}">Completed</a>
+    <a href="?status=cancelled" class="btn btn-sm {% if status_filter == 'cancelled' %}btn-primary{% else %}btn-secondary{% endif %}" style="{% if status_filter == 'cancelled' %}{% else %}border-color:rgba(199, 70, 70, 0.3);color:red;{% endif %}">Cancelled</a>
+
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th style="font-size:13px; align-items:center;">ID</th>
+                    <th>Customer</th>
+                    <th style="padding-left:30px;">Status</th>
+                    <th>Amount</th>
+                    <th class="d-none d-md-table-cell">Payment</th>
+                    <th class="d-none d-md-table-cell">Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td><span style="color:var(--accent);font-weight:700;font-size:17px;">#{{ order.order_number }}</span></td>
+                    <td>
+                        <div style="font-weight:600;">{{ order.customer.name }}</div>
+                        <div class="d-md-none" style="font-size:11px;color:var(--text-muted);margin-top:2px;">{{ order.created_at|date:"M d, g:i A" }}</div>
+                    </td>
+                    <td><span class="badge status-{{ order.status }}">{{ order.get_status_display }}</span></td>
+                    <td style="font-weight:700;">₱{{ order.total_amount|floatformat:2 }}</td>
+                    <td class="d-none d-md-table-cell">
+                        {% if order.is_paid %}
+                        <span style="color:#04a712bf;font-size:12px;font-weight:600;"><i class="bi bi-check-circle me-1"></i>Paid</span>
+                        {% elif order.amount_paid > 0 %}
+                        <span style="color:#fbbf24;font-size:12px;font-weight:600;"><i class="bi bi-exclamation-circle me-1"></i>Partial</span>
+                        {% else %}
+                        <span style="color:var(--danger);font-size:12px;font-weight:600;"><i class="bi bi-x-circle me-1"></i>Unpaid</span>
+                        {% endif %}
+                    </td>
+                    <td class="d-none d-md-table-cell" style="color:var(--text-muted);font-size:12px;">{{ order.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a href="{% url 'order_detail' order.order_number %}" class="btn btn-sm btn-secondary" title="View"><i class="bi bi-eye"></i></a>
+                            <button type="button" class="btn btn-sm btn-soft-danger" title="Delete" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal"
+                            data-delete-url="{% url 'order_delete' order.order_number %}" data-delete-type="order" data-delete-name="Order #{{ order.order_number }}"><i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center py-5" style="color:var(--text-muted);">
+                        <i class="bi bi-bag" style="font-size:40px;display:block;margin-bottom:12px;opacity:.4;"></i>
+                        <div style="font-size:16px;font-weight:600;margin-bottom:6px;">No orders found</div>
+                        <a href="{% url 'order_create' %}" class="btn btn-primary btn-sm mt-2">Create First Order</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'laundry/base.html' %}
+{% block title %}Services - FreshWave{% endblock %}
+{% block page_title %}Services{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h2>Laundry Services</h2>
+    <a href="/admin/laundry/service/add/" class="btn btn-primary">
+        <i class="bi bi-plus me-1"></i>Add Service
+    </a>
+</div>
+
+<div class="row g-3">
+    {% for service in services %}
+    <div class="col-md-6 col-xl-4">
+        <div class="card" style="{% if service.is_active %}{% else %}opacity:.5;{% endif %}">
+            <div class="card-body" style="padding:22px;color:var(--text);">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:-8px;">
+                    <div style="font-family:var(--font-system);font-weight:700;font-size:17px;">
+                        {% if service.name == 'washing' %}
+                        {% elif service.name == 'drying' %}
+                        {% elif service.name == 'folding' %}
+                        {% elif service.name == 'ironing' %}
+                        {% elif service.name == 'drycleaning'%}    
+                        {% elif service.name == 'bleaching' %}
+                        {% else %}{% endif %}
+                    </div>
+                    {% if service.is_active %}
+                    <span class="badge"style="background:rgba(4, 167, 18, 0.75);color:var(--actib);border:1px solid rgba(16,185,129,.2);">Active</span>
+                    {% else %}
+                    <span class="badge" style="background:rgba(100,116,139,.15);color:#64748b;">Inactive</span>
+                    {% endif %}
+                </div>
+                <div style="font-family:var(--font-system);font-weight:700;font-size:18px;margin-bottom:4px;">{{ service.get_name_display }}</div>
+                {% if service.description %}
+                <div style="font-size:13px;color:var(--text-muted);margin-bottom:10px;">{{ service.description }}</div>
+                {% endif %}
+                <div style="font-family:var(--font-system);font-size:22px;font-weight:800;color:var(--accent);">₱{{ service.price }}<span style="font-size:13px;font-weight:400;color:var(--text-muted);font-family:var(--font-system);">/kg</span></div>
+                <a href="/admin/laundry/service/{{ service.pk }}/change/" class="btn btn-secondary btn-sm mt-3 w-100">
+                    <i class="bi bi-pencil me-1"></i>Edit in Admin
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body text-center py-5" style="color:var(--text-muted);">
+                <i class="bi bi-stars" style="font-size:40px;display:block;margin-bottom:12px;opacity:.4;"></i>
+                <div style="font-size:16px;font-weight:600;margin-bottom:6px;">No services configured</div>
+                <div style="font-size:14px;margin-bottom:16px;">Run the setup script or add services via admin.</div>
+                <a href="/admin/laundry/service/add/" class="btn btn-primary">Add First Service</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

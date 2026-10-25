@@ -1,0 +1,98 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - FreshWave Laundry</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'laundry/favicon/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'laundry/favicon/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'laundry/favicon/favicon-16x16.png' %}">
+    <link rel="icon" href="{% static 'laundry/favicon/favicon.ico' %}">
+    <link rel="manifest" href="{% static 'laundry/favicon/site.webmanifest' %}">
+    <link rel="stylesheet" href="{% static 'laundry/css/base.css' %}">
+    <link rel="stylesheet" href="{% static 'laundry/css/login.css' %}">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body class="login-body">
+    <div class="login-card">
+        <div class="brand">
+            <div class="login-brand-icon">
+                <img src="{% static 'laundry/IMG/newlogo.png' %}" alt="FreshWave Logo">
+            </div>
+            <div class="brand-name">FreshWave</div>
+            <div class="brand-sub">Laundry Management System</div>
+        </div>
+
+        <!-- Error alert -->
+        {% if form.errors %}
+        <div class="alert-login-error mb-3">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            Invalid username or password. Please try again.
+        </div>
+        {% endif %}
+
+        <!-- Login form -->
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-person"></i></span>
+                    <input type="text" name="username" class="form-control"
+                        placeholder="Enter your username" required autofocus>
+                </div>
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Password</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                    <input type="password" id="password" name="password" class="form-control"
+                        placeholder="Enter your password" required>
+                    <button class="password-toggle" type="button" id="togglePassword">
+                        <i class="bi bi-eye" id="toggleIcon"></i>
+                    </button>
+                </div>
+            </div>
+            <button type="submit" class="btn-login">
+                <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+            </button>
+        </form>
+        <div class="divider-text">─── Admin & Staff Access Only ───</div>
+        <div class="info-box">
+            If you don't have an account?<strong style="color:var(--accent);text-decoration:underline;gap:2rem;">Click Here</strong>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const password = document.getElementById('password');
+            const toggleBtn = document.getElementById('togglePassword');
+            const icon = document.getElementById('toggleIcon');
+
+            toggleBtn.addEventListener('click', function () {
+                icon.style.opacity = '0';
+                icon.style.transform = 'scale(.7) rotate(90deg)';
+
+                setTimeout(() => {
+                    if (password.type === 'password') {
+                        password.type = 'text';
+                        icon.classList.remove('bi-eye-slash');
+                        icon.classList.add('bi-eye');
+                    } else {
+                        password.type = 'password';
+                        icon.classList.remove('bi-eye');
+                        icon.classList.add('bi-eye-slash');
+                    }
+                    icon.style.opacity = '1';
+                    icon.style.transform = 'scale(1) rotate(0deg)';
+                }, 120);
+            });
+        });
+    </script>
+</body>
+</html>

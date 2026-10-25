@@ -1,0 +1,1204 @@
+/* =============================================================
+    base.css — FreshWave Laundry
+    Global layout, theme, sidebar, topbar, cards, forms, tables,
+    badges, alerts, and utilities shared across every page.
+   ============================================================= */
+
+/* -------------------------------------------------------------
+    SECTION 1: THEME VARIABLES
+    CSS custom properties for dark/light mode.
+   ------------------------------------------------------------- */
+:root,
+[data-theme="dark"] {
+    --bg:              #0a0e1a;        /* page background */
+    --surface:         #111827;        /* card / sidebar background */
+    --surface2:        #1a2235;        /* input / nav-link background */
+    --border:          #1e2d45;        /* all border colors */
+    --accent:          #00d4ff;        /* cyan — primary highlight */
+    --accent2:         #7c3aed;        /* purple — secondary highlight */
+    --accent3:         #10b981;        /* green — success / paid */
+    --text:            #d7d8da;        /* primary text */
+    --text-muted:      #98999b;        /* secondary / placeholder text */
+    --danger:          #ef4444;        /* red — errors / delete */
+    --warning:         #f59e0b;        /* amber — warnings */
+    --topbar-bg:       rgba(10, 14, 26, 0.95);
+    --table-row-hover: rgba(255, 255, 255, 0.02);
+    --font-system: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+                "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+[data-theme="light"] {
+    --bg:              #e6edf5;
+    --surface:         #ffffff;
+    --surface2:        #dbe7f3;
+    --border:          #8fa3b8;
+    --accent:          #005f99;
+    --accent2:         #5b21b6;
+    --accent3:         #0f9f5f;
+    --text:            #0f172a;
+    --text-muted:      #334155;
+    --danger:          #b91c1c;
+    --warning:         #b45309;
+    --topbar-bg:       rgba(230, 237, 245, 0.96);
+    --table-row-hover: rgba(0, 95, 153, 0.06);
+}
+
+[data-theme="light"] .card,
+[data-theme="light"] .stat-card,
+[data-theme="light"] .sidebar,
+[data-theme="light"] .login-card {
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+}
+
+[data-theme="light"] .nav-link {
+    background: #e3edf7;
+    color: #334155;
+    border-color: #9db1c5;
+}
+
+[data-theme="light"] .nav-link:hover {
+    background: linear-gradient(135deg, rgba(0,95,153,0.10), rgba(91,33,182,0.08));
+    border-color: #005f99;
+    color: #0f172a;
+}
+
+[data-theme="light"] .nav-link.active {
+    background: linear-gradient(135deg, rgba(0,95,153,0.14), rgba(91,33,182,0.12));
+    color: #005f99;
+    border-color: rgba(0,95,153,0.35);
+    box-shadow: 0 0 0 1px rgba(0,95,153,0.08);
+}
+
+[data-theme="light"] .form-control,
+[data-theme="light"] .form-select,
+[data-theme="light"] input[type="date"],
+[data-theme="light"] .custom-status-select,
+[data-theme="light"] .input-group-text {
+    background: #eef4fb;
+    border-color: #8fa3b8;
+    color: #0f172a;
+}
+
+[data-theme="light"] .form-control:focus,
+[data-theme="light"] .form-select:focus,
+[data-theme="light"] input[type="date"]:focus {
+    border-color: #005f99;
+    box-shadow: 0 0 0 3px rgba(0,95,153,0.14);
+}
+
+[data-theme="light"] .table tbody tr:hover {
+    background: rgba(0, 95, 153, 0.05);
+}
+
+[data-theme="light"] .toggle-track {
+    background: rgba(0,95,153,0.10);
+    border-color: rgba(0,95,153,0.30);
+}
+
+/* -------------------------------------------------------------
+    SECTION 2: RESET & BODY
+    Box-sizing reset, body font, background, smooth transitions.
+   ------------------------------------------------------------- */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: var(--font-system);
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+            transition: background 0.3s ease, color 0.3s ease;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 { font-weight: 600; letter-spacing: -0.01em; }
+
+
+/* -------------------------------------------------------------
+    SECTION 3: SIDEBAR
+    Fixed left navigation panel: brand, nav links, footer.
+   ------------------------------------------------------------- */
+
+.sidebar {
+    position: fixed;
+        top: 0; left: 0;
+        width: var(--sidebar-w, 260px);
+        height: 100vh;
+        background: var(--surface);
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        z-index: 1000;
+        transition: transform .3s ease, background .3s ease, border-color .3s ease;
+}
+
+.sidebar-brand {
+    padding: 24px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.brand-icon {
+    width: 42px; height: 42px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    flex-shrink: 0;
+    overflow: hidden;
+    padding: 4px;
+    position: relative;
+}
+
+.logo-light,
+.logo-dark {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Light Theme */
+[data-theme="light"] .logo-light {
+    display: block;
+}
+
+[data-theme="light"] .logo-dark {
+    display: none;
+}
+
+/* Dark Theme */
+[data-theme="dark"] .logo-light {
+    display: none;
+}
+
+[data-theme="dark"] .logo-dark {
+    display: block;
+}
+
+/* "FreshWave" gradient text */
+.brand-text {
+    font-family: var(--font-system);
+    font-weight: 800;
+    font-size: 18px;
+    background: linear-gradient(135deg, var(--accent), var(--text));
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1.1;
+    margin-left: 20px;
+}
+
+/* "Laundry Management" subtitle */
+.brand-sub {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-left: 10px;
+}
+
+/* Scrollable nav list area */
+.sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+
+/* Small uppercase category labels */
+.nav-section-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text);
+    padding: 16px 10px 6px;
+    font-weight: 600;
+}
+
+/* Wrapper around each nav link */
+.nav-item { margin: 15px 0; }
+
+/* Nav link pill */
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all .25s ease;
+    position: relative;
+}
+.nav-link:hover {
+    background: linear-gradient(135deg, rgba(0,212,255,0.08), rgba(124,58,237,0.08));
+    color: var(--text);
+    border-color: var(--accent);
+    transform: translateX(3px);
+}
+.nav-link.active {
+    background: linear-gradient(135deg, rgba(0,212,255,.15), rgba(124,58,237,.15));
+    color: var(--accent);
+    border: 1px solid rgba(0,212,255,.25);
+    box-shadow: 0 0 12px rgba(0,212,255,0.15);
+}
+
+/* Left accent bar on the active link */
+.nav-link.active::before {
+    content: '';
+    position: absolute;
+    left: -2px; top: 20%; bottom: 20%;
+    width: 3px;
+    background: var(--accent);
+    border-radius: 3px;
+}
+
+.nav-link i { font-size: 17px; width: 20px; text-align: center; }
+
+/* Count chip on nav link (e.g. active orders) */
+.nav-badge {
+    background: rgba(0,212,255,.15);
+    color: var(--accent);
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: auto;
+}
+
+/* Bottom section: user info + logout */
+.sidebar-footer {
+    padding: 16px 12px;
+    border-top: 1px solid var(--border);
+}
+
+/* User info row in sidebar footer */
+.user-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: var(--surface2);
+    text-decoration: none;
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: default;
+}
+
+/* Circular initials avatar in sidebar footer */
+.user-avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    color: #fff;
+    flex-shrink: 0;
+}
+.user-name-text { font-size: 13px; font-weight: 600; color: var(--text); }
+.user-role-text  { font-size: 11px; color: var(--text-muted); }
+
+/* Logout button */
+.btn-logout {
+    background: rgba(239,68,68,.1);
+    color: var(--danger);
+    border: 1px solid rgba(239,68,68,.2);
+    border-radius: 8px;
+    padding: 8px 10px;
+}
+
+/* Logout <form> sits inline next to the user card */
+.logout-form { display: inline; }   /* replaces style="display:inline" in base.html */
+
+
+/* -------------------------------------------------------------
+    SECTION 4: MAIN CONTENT AREA
+    Right-side wrapper that fills the space beside the sidebar.
+   ------------------------------------------------------------- */
+.main-content {
+    margin-left: 260px;   /* matches .sidebar width */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* -------------------------------------------------------------
+    SECTION 5: TOPBAR
+    Sticky header with page title and action icons.
+   ------------------------------------------------------------- */
+.topbar {
+    position: sticky;
+    top: 0;
+    background: var(--topbar-bg);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    z-index: 100;
+    transition: background .3s ease, border-color .3s ease;
+}
+.topbar-title {
+    font-family: var(--font-system);
+    font-weight: 700;
+    font-size: 20px;
+    color: var(--text);
+}
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
+
+/* Hamburger icon size — replaces style="font-size:18px" on the <i> in base.html */
+.mobile-toggle-icon { font-size: 18px; }
+
+/* Notification bell button */
+.notif-btn {
+    position: relative;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all .2s;
+    text-decoration: none;
+}
+.notif-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Red count badge on bell */
+.notif-badge {
+    position: absolute;
+    top: -5px; right: -5px;
+    background: var(--danger);
+    color: white;
+    font-size: 10px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+}
+
+/* Alert close button — invert for dark mode visibility */
+/* replaces style="filter:invert(.5)" on btn-close in base.html */
+.alert-close-invert { filter: invert(.5); }
+
+
+/* -------------------------------------------------------------
+    SECTION 6: THEME TOGGLE SWITCH
+    Sun/moon sliding toggle in topbar.
+   ------------------------------------------------------------- */
+.theme-toggle {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    background: none;
+    border: none;
+    padding: 0;
+}
+.toggle-track {
+    position: relative;
+    width: 62px; height: 30px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 8px;
+    overflow: hidden;
+    transition: background .3s ease, border-color .3s ease, box-shadow .3s ease;
+}
+[data-theme="dark"] .toggle-track {
+    background: rgba(0,212,255,0.1);
+    border-color: rgba(0,212,255,0.3);
+    box-shadow: 0 0 10px rgba(0,212,255,0.12);
+}
+[data-theme="light"] .toggle-track {
+    background: rgba(2,132,199,0.08);
+    border-color: rgba(2,132,199,0.25);
+}
+.toggle-label-sun,
+.toggle-label-moon {
+    font-size: 13px;
+    line-height: 1;
+    z-index: 1;
+    transition: opacity .25s ease;
+    user-select: none;
+}
+[data-theme="dark"]  .toggle-label-sun  { opacity: 0.3; }
+[data-theme="light"] .toggle-label-sun  { opacity: 1; }
+[data-theme="dark"]  .toggle-label-moon { opacity: 1; }
+[data-theme="light"] .toggle-label-moon { opacity: 0.3; }
+
+/* Sliding thumb — position set per theme */
+.toggle-thumb {
+    position: absolute;
+    top: 3px;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    box-shadow: 0 0 8px rgba(0,212,255,0.5);
+    transition: left .3s cubic-bezier(.4,0,.2,1), box-shadow .3s ease;
+    z-index: 2;
+}
+[data-theme="light"] .toggle-thumb { left: 3px; }
+[data-theme="dark"]  .toggle-thumb { left: 35px; }
+
+
+/* -------------------------------------------------------------
+    SECTION 7 NOTIFICATION DROPDOWN
+    Dropdown panel shown when notification bell is clicked.
+   ------------------------------------------------------------- */
+#notifDropdownWrap {
+    position: relative;
+}
+
+/* Panel default: hidden */
+.notif-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    left: auto;
+    width: 360px;
+    max-height: 520px;
+    overflow: hidden;
+    display: flex;          /* always flex — visibility controls hiding */
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 0;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, .4), 0 0 0 1px rgba(0, 212, 255, .06);
+    z-index: 9999;
+
+    /* Hidden state — use opacity+visibility so transition works */
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-8px);
+    transition: opacity .18s ease, visibility .18s ease, transform .18s ease;
+}
+
+/* Panel open: JS adds .notif-open to #notifDropdownWrap */
+#notifDropdownWrap.notif-open .notif-dropdown {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+/* Header */
+.notif-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+}
+
+.notif-header-text {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+}
+
+/* Header-level action buttons (Mark all read / Delete all) */
+.notif-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.notif-header-actions form {
+    margin: 0;
+    display: inline-flex;
+}
+
+/* Text action buttons */
+.notif-action-text-btn {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    transition: opacity .2s;
+    font-family: inherit;
+    white-space: nowrap;
+}
+.notif-action-text-btn:hover  { opacity: .7; text-decoration: underline; }
+.notif-action-text-btn.danger { color: var(--danger); }
+
+/* Tabs  */
+.notif-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 10px 12px 0;
+    flex-shrink: 0;
+}
+
+.notif-tab {
+    background: none;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all .2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: inherit;
+}
+.notif-tab:hover  { background: var(--surface2); color: var(--text); }
+.notif-tab.active {
+    background: rgba(0, 212, 255, .1);
+    color: var(--accent);
+    border: 1px solid rgba(0, 212, 255, .2);
+}
+
+.notif-tab-count {
+    background: var(--surface2);
+    border-radius: 999px;
+    padding: 1px 7px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+.notif-tab-count.unread {
+    background: rgba(0, 212, 255, .15);
+    color: var(--accent);
+}
+
+/* Scroll area */
+.notif-scroll-area {
+    overflow-y: auto;
+    padding: 10px;
+    flex: 1;
+    max-height: 380px;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Hidden tab panel state */
+.notif-tab-panel-hidden {
+    display: none;
+}
+
+/*  Notification item */
+.notif-item {
+    border-radius: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    margin-bottom: 6px;
+    transition: border-color .2s, transform .2s, box-shadow .2s;
+    overflow: hidden;
+}
+.notif-item:last-child { margin-bottom: 0; }
+.notif-item:hover {
+    border-color: rgba(0, 212, 255, .2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .15);
+}
+.notif-read       { opacity: .65; }
+.notif-read:hover { opacity: .85; }
+
+.notif-item-inner {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    position: relative;
+}
+
+/* Type icon */
+.notif-type-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+.ic-order   { background: rgba(0, 212, 255, .1); }
+.ic-payment { background: rgba(52, 211, 153, .1); }
+.ic-ready   { background: rgba(52, 211, 153, .12); }
+.ic-status  { background: rgba(129, 140, 248, .1); }
+.ic-info    { background: rgba(100, 116, 139, .1); }
+
+/* Item body */
+.notif-item-body {
+    flex: 1;
+    min-width: 0;          /* prevents text from overflowing flex parent */
+    display: flex;
+    flex-direction: column;
+}
+
+.notif-item-title {
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 3px;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.notif-item-msg {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.45;
+    margin-bottom: 7px;
+    display: -webkit-box;
+    line-clamp: 2;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Footer: time left, actions right — actions never separate */
+.notif-item-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: auto;
+}
+
+.notif-time {
+    font-size: 10px;
+    color: var(--text-muted);
+    opacity: .7;
+    flex-shrink: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Actions group — flex-shrink:0 keeps Read+Delete always together */
+.notif-actions-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.notif-actions-row form {
+    margin: 0;
+    display: inline-flex;
+}
+
+.notif-read-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    opacity: .5;
+    white-space: nowrap;
+}
+
+/* Unread dot */
+.notif-unread-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
+    flex-shrink: 0;
+    margin-top: 4px;
+}
+
+/* Empty state */
+.notif-empty {
+    text-align: center;
+    padding: 30px 16px;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.notif-empty-icon {
+    display: block;
+    font-size: 28px;
+    margin-bottom: 6px;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+    .notif-dropdown {
+        right: 0;
+        left: auto;
+        width: min(340px, calc(100vw - 24px));
+        max-width: calc(100vw - 24px);
+    }
+}
+
+/* -------------------------------------------------------------
+    SECTION 8: PAGE BODY & PAGE HEADER
+    Content wrapper and reusable title + action bar at page top.
+   ------------------------------------------------------------- */
+.page-body { padding: 28px; flex: 1; }
+
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+.page-header h2 { font-size: 24px; font-weight: 700; color: var(--text); }
+.page-sub       { color: var(--text-muted); font-size: 14px; margin-top: 2px; }
+
+
+/* -------------------------------------------------------------
+    SECTION 9: CARDS
+    Surface containers for all content blocks.
+   ------------------------------------------------------------- */
+.card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    transition: border-color .2s, background .3s ease;
+}
+.card:hover { border-color: rgba(0,212,255,.25); }
+
+/* Transparent header strip — overrides Bootstrap default */
+.card-header { padding: 18px 22px 0; background: transparent; border: none; }
+.card-body   { padding: 20px 22px; }
+
+/* Bold heading inside a card */
+.card-heading { font-size: 16px; font-weight: 700; color: var(--text); }
+
+/* Decorative bottom-of-page accent card (thin cyan border line) */
+.card-accent { border-color: var(--accent); }
+
+/* Card body padding overrides used in specific pages */
+.card-body--padded { padding: 28px; }   /* customer_form, order_form */
+.card-body--tight  { padding: 22px; }   /* service_list */
+
+
+/* -------------------------------------------------------------
+    SECTION 10: STAT CARDS
+    Metric summary boxes on dashboard and payment_list.
+   ------------------------------------------------------------- */
+.stat-card {
+    padding: 22px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    position: relative;
+    overflow: hidden;
+    transition: transform .2s, border-color .2s, background .3s ease;
+}
+.stat-card:hover { transform: translateY(-2px); }
+
+/* Decorative background glow circle */
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 100px; height: 100px;
+    border-radius: 50%;
+    opacity: .08;
+}
+
+/* Color variants */
+.stat-card.cyan   { border-color: rgba(0,212,255,.2); }
+.stat-card.purple { border-color: rgba(124,58,237,.2); }
+.stat-card.green  { border-color: rgba(16,185,129,.2); }
+.stat-card.orange { border-color: rgba(245,158,11,.2); }
+.stat-card.cyan::before   { background: var(--accent); }
+.stat-card.purple::before { background: var(--accent2); }
+.stat-card.green::before  { background: var(--accent3); }
+.stat-card.orange::before { background: var(--warning); }
+
+/* Icon box inside stat card */
+.stat-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    margin-bottom: 14px;
+}
+.stat-icon.cyan   { background: rgba(0,212,255,.12);  color: var(--accent); }
+.stat-icon.purple { background: rgba(124,58,237,.12); color: var(--accent2); }
+.stat-icon.green  { background: rgba(16,185,129,.12); color: var(--accent3); }
+.stat-icon.orange { background: rgba(245,158,11,.12); color: var(--warning); }
+
+.stat-value { font-family:var(--font-system); font-size: 28px; font-weight: 800; line-height: 1; margin-bottom: 4px; color: var(--text); }
+.stat-label { color: var(--text-muted); font-size: 13px; }
+
+
+/* -------------------------------------------------------------
+    SECTION 11: BUTTONS
+    All button variants used across the app.
+   ------------------------------------------------------------- */
+.btn { font-family: var(--font-system); font-weight: 500; border-radius: 9px; transition: all .2s; }
+
+/* Primary — cyan gradient */
+.btn-primary { background: linear-gradient(135deg, var(--accent), #0090c0); border: none; color: #fff; font-weight: 600; }
+.btn-primary:hover { background: linear-gradient(135deg, #33ddff, #00aadd); transform: translateY(-1px); box-shadow: 0 4px 15px rgba(0,212,255,.3); color: #000; }
+
+/* Outline primary */
+.btn-outline-primary { border-color: var(--accent); color: var(--accent); }
+.btn-outline-primary:hover { background: var(--accent); color: #000; }
+
+/* Success — green gradient */
+.btn-success { background: linear-gradient(135deg, var(--accent3), #059669); border: none; color: white; font-weight: 600; }
+.btn-success:hover { transform: translateY(-1px); }
+
+/* Danger — red gradient */
+.btn-danger { background: linear-gradient(135deg, var(--danger), #b91c1c); border: none; color: white; }
+
+/* Secondary — neutral */
+.btn-secondary { background: var(--surface2); border: 1px solid var(--border); color: var(--text); }
+.btn-secondary:hover { background: var(--border); color: var(--text); }
+
+/* Ready for pickup */
+.btn-ready { background: rgba(4,114,77,0.96); border-color: rgba(16,185,129,.3); color: var(--text); }
+
+/* Small icon buttons */
+.btn-icon-danger { background: rgba(239,68,68,.1); color: var(--danger); border: 1px solid rgba(239,68,68,.2); }
+.btn-icon-accent { background: rgba(0,212,255,.1); color: var(--accent); border: 1px solid rgba(0,212,255,.3); font-size: 13px; padding: 6px 12px; }
+
+/* Clear filter X attached to search/filter row */
+.btn-clear-filter {
+    display: flex; align-items: center; justify-content: center;
+    width: 32px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: none;
+    border-radius: 0 9px 9px 0;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color .2s;
+}
+.btn-clear-filter:hover { color: var(--danger); }
+
+/* X icon inside clear filter button — replaces style="font-size:13px" on bi-x-lg */
+.btn-clear-filter .bi { font-size: 13px; }
+
+/* Quick status-advance buttons in order_detail sidebar */
+.btn-status-washing { background: rgba(59,130,246,.15);  color: #60a5fa; border: 1px solid rgba(59,130,246,.3); }
+.btn-status-drying  { background: rgba(245,158,11,.15);  color: #fbbf24; border: 1px solid rgba(245,158,11,.3); }
+.btn-status-ready   { background: rgba(16,185,129,.15);  color: #34d399; border: 1px solid rgba(16,185,129,.3); }
+
+
+/* -------------------------------------------------------------
+    SECTION 12: FORMS
+    Inputs, selects, labels, hints, and errors.
+   ------------------------------------------------------------- */
+.form-control, .form-select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 9px;
+    padding: 10px 14px;
+    transition: all .2s;
+}
+.form-control:focus, .form-select:focus {
+    background: var(--surface2);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,212,255,.12);
+    color: var(--text);
+}
+.form-control::placeholder { color: var(--text-muted); }
+.form-select option { background: var(--surface2); color: var(--text); }
+.form-label    { color: var(--text); font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+.form-hint     { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.form-error    { color: #f87171; font-size: 12px; margin-top: 4px; }
+.field-required { color: var(--danger); }
+
+/* Date input — themed to match dark/light mode */
+input[type="date"] {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 9px;
+    padding: 10px 14px;
+    font-family: var(--font-system);
+    font-size: 14px;
+    -webkit-appearance: none;
+    appearance: none;
+    min-width: 160px;
+    width: 100%;
+    max-width: 220px;
+    transition: border-color .2s, box-shadow .2s;
+}
+input[type="date"]:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,212,255,.12);
+}
+input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1) opacity(0.6); cursor: pointer; }
+[data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0) opacity(0.5); }
+
+/* Custom order list status dropdown */
+.status-dropdown{
+    position:relative;
+}
+
+.status-trigger{
+    width:170px;
+    height:44px;
+    background:var(--surface2);
+    border:1px solid var(--border);
+    border-radius:12px;
+    color:var(--text);
+    padding:0 14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    cursor:pointer;
+    transition:.25s;
+}
+.status-trigger:hover{
+    border-color:var(--accent);
+}
+.status-trigger i{
+    transition:.25s;
+}
+.status-dropdown.open .status-trigger i{
+    transform:rotate(180deg);
+}
+
+/* PANEL */
+.status-menu{
+    position:absolute;
+    top: calc(100% + 1px); right:0; width:100%;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:8px;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    z-index:999;
+    opacity:0;
+    transform: translateY(-10px) scale(.98);
+    visibility:hidden;
+    pointer-events:none;
+    transition: opacity .25s ease, transform .25s ease, visibility .25s;
+}
+
+.status-dropdown.open .status-menu{
+    opacity:1;
+    visibility:visible;
+    transform: translateY(0) scale(1);
+    pointer-events:auto;
+}
+
+.status-menu button{
+    background:none;
+    border:none;
+    color:var(--text);
+    text-align:left;
+    padding:12px;
+    border-radius:10px;
+    transition:.2s;
+    cursor:pointer;
+}
+
+.status-menu button:hover{
+    background:rgba(0,212,255,.08);
+    color:var(--accent);
+    transform:translateX(4px);
+}
+
+/* Search box with icon overlaid on the left of the input */
+.search-box { position: relative; }
+.search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 15px; pointer-events: none; }
+.search-box input { padding-left: 36px; }
+
+/* Width constraints for search inputs */
+.search-input-md { width: 240px; max-width: 100%; }   /* customer_list */
+.search-input-sm { width: 220px; max-width: 100%; }   /* order_list */
+
+
+/* -------------------------------------------------------------
+    SECTION 13: TABLES
+    All list-page data tables.
+   ------------------------------------------------------------- */
+.table { color: var(--text); --bs-table-bg: transparent; }
+.table th {
+    color: var(--text-muted);
+    font-size: 12px; text-transform: uppercase;
+    letter-spacing: .8px; font-weight: 600;
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+}
+.table td {
+    padding: 13px 16px;
+    border-color: var(--border);
+    vertical-align: middle;
+    font-size: 14px;
+    color: var(--text);
+}
+.table tbody tr:hover { background: var(--table-row-hover); }
+
+/* Cell content helpers */
+.table-id     { color: var(--accent); font-weight: 700; font-size: 17px; }
+.table-name   { font-weight: 600; }
+.table-sub    { font-size: 12px; color: var(--text-muted); }
+.table-muted  { color: var(--text-muted); font-size: 13px; }
+.table-amount { font-weight: 700; }
+
+/* Clickable row — pointer cursor */
+.table-clickable { cursor: pointer; }
+.order-row       { cursor: pointer; }
+.order-row:hover td { background: rgba(0,212,255,.03) !important; }
+
+/* Service tag chips inside the services column of order_list */
+.service-tag { background: var(--surface2); padding: 2px 7px; border-radius: 5px; font-size: 11px; display: inline-block; margin: 1px; }
+
+/* Font size for services cell — replaces style="font-size:13px" on <td> in order_list */
+.td-services { font-size: 13px; }
+
+/* Max-width on address column — replaces style="max-width:200px" in customer_list */
+.td-address { max-width: 200px; }
+
+/* Active orders count under customer name — replaces style="color:var(--accent3)" in customer_list */
+.td-active-orders { color: var(--accent3); }
+
+/* Payment status text — used in order_detail balance and customer_detail balance */
+.text-paid    { color: #34d399; font-weight: 700; }
+.text-unpaid  { color: #f87171; font-weight: 700; }
+.text-partial { color: #fbbf24; font-size: 12px; font-weight: 600; }
+
+/* Payment amount in payment_list — replaces style="font-size:16px" */
+.table-payment-amount { font-size: 16px; }
+
+/* Order tfoot total row cells */
+.tfoot-label { padding: 14px 16px; }
+.tfoot-total { font-size: 18px; padding: 14px 16px; }
+
+
+/* -------------------------------------------------------------
+    SECTION 14: BADGES
+    Status chips used in tables and detail pages.
+   ------------------------------------------------------------- */
+.badge {
+    font-size: 11px; font-weight: 600;
+    padding: 5px 10px; border-radius: 6px;
+    text-transform: uppercase; letter-spacing: .5px;
+}
+
+/* Order status */
+.badge.status-received  { background: rgba(100,116,139,.15); color: #64748b;  border: 1px solid rgba(100,116,139,.35); }
+.badge.status-washing   { background: rgba(59,130,246,.15);  color: #3b82f6;  border: 1px solid rgba(59,130,246,.35); }
+.badge.status-drying    { background: rgba(245,158,11,.15);  color: #d97706;  border: 1px solid rgba(245,158,11,.35); }
+.badge.status-folding   { background: rgba(124,58,237,.15);  color: #7c3aed;  border: 1px solid rgba(124,58,237,.35); }
+.badge.status-ready     { background: rgba(16,185,129,.15);  color: #059669;  border: 1px solid rgba(16,185,129,.35); }
+.badge.status-completed { background: rgba(100,116,139,.10); color: #64748b;  border: 1px solid rgba(100,116,139,.25); }
+.badge.status-cancelled { background: rgba(239,68,68,.12);   color: #dc2626;  border: 1px solid rgba(239,68,68,.3); }
+
+/* Payment status */
+.badge.status-paid      { background: rgba(16,185,129,.15);  color: #059669;  border: 1px solid rgba(16,185,129,.35); }
+.badge.status-pending   { background: rgba(245,158,11,.15);  color: #d97706;  border: 1px solid rgba(245,158,11,.35); }
+.badge.status-partial   { background: rgba(245,158,11,.15); color: #d97706; border: 1px solid rgba(245,158,11,.35); }
+
+/* Service active/inactive — service_list.html */
+.badge-active   { background: rgba(4,167,18,.75); color: #fff; border: 1px solid rgba(16,185,129,.2); }
+.badge-inactive { background: rgba(100,116,139,.15); color: #64748b; }
+
+/* Larger badge variant — order_detail header status badge */
+/* replaces style="font-size:13px;padding:8px 14px" on <span class="badge"> */
+.badge-lg { font-size: 13px; padding: 8px 14px; }
+
+
+/* -------------------------------------------------------------
+    SECTION 15: ALERTS (Django messages framework)
+    Auto-dismissing toast messages at top of pages.
+   ------------------------------------------------------------- */
+.alert         { border-radius: 14px; border: none; font-size: 14px; }
+.alert-success { background: rgba(16,185,129,.12);  color: #059669;       border-left: 3px solid var(--accent3); }
+.alert-danger  { background: rgba(239,68,68,.12);   color: var(--danger); border-left: 3px solid var(--danger); }
+.alert-error   { background: rgba(239,68,68,.12); color: var(--danger); border-left: 3px solid var(--danger); }
+.alert-warning { background: rgba(245,158,11,.12);  color: var(--warning);border-left: 3px solid var(--warning); }
+.alert-info    { background: rgba(0,212,255,.08);   color: var(--accent); border-left: 3px solid var(--accent); }
+
+
+/* -------------------------------------------------------------
+    SECTION 16: AVATAR CIRCLES
+    Initials circles used in sidebar, tables, and detail pages.
+   ------------------------------------------------------------- */
+.avatar {
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+}
+.avatar-sm { width: 36px; height: 36px; font-size: 14px; }
+.avatar-md { width: 44px; height: 44px; font-size: 18px; font-weight: 800; }
+
+
+/* -------------------------------------------------------------
+    SECTION 17 — EMPTY STATES
+    Centered placeholder shown when a list is empty.
+    HTML: order_list, customer_list, order_detail, service_list
+   ------------------------------------------------------------- */
+.empty-state       { color: var(--text-muted); }
+.empty-state-icon  { font-size: 40px; display: block; margin-bottom: 12px; opacity: .4; }
+.empty-state-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+
+
+/* -------------------------------------------------------------
+    SECTION 18: FLATPICKR DATE PICKER
+    Overrides to match theme for the pickup date field.
+   ------------------------------------------------------------- */
+.flatpickr-calendar { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 12px; }
+.flatpickr-day.selected { background: var(--accent); border-color: var(--accent); }
+.flatpickr-time input   { color: var(--text); }
+
+
+/* -------------------------------------------------------------
+    SECTION 19: UTILITY CLASSES
+    Small single-purpose helpers.
+   ------------------------------------------------------------- */
+.divider      { border-color: var(--border); }
+.text-accent  { color: var(--accent); }
+.text-muted   { color: var(--text-muted) !important; }
+.no-underline { text-decoration: none; color: inherit; }
+.fw-700       { font-weight: 700; }
+.fw-800       { font-weight: 800; }
+
+
+/* -------------------------------------------------------------
+    SECTION 20: SCROLLBAR
+    Thin webkit scrollbar for all scrollable areas.
+   ------------------------------------------------------------- */
+::-webkit-scrollbar       { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+
+/* -------------------------------------------------------------
+    SECTION 21: MOBILE / RESPONSIVE
+    Sidebar off-canvas on small screens.
+   ------------------------------------------------------------- */
+.mobile-toggle { display: none; }
+
+@media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.show { transform: translateX(0); }
+    .main-content { margin-left: 0; }
+    .mobile-toggle { display: flex !important; }
+    .page-body { padding: 16px; }
+    input[type="date"] { max-width: 100%; font-size: 16px; }
+    .notif-dropdown { right: 0; left: auto; width: min(340px, calc(100vw - 24px)); max-width: calc(100vw - 24px); }
+}
+
+

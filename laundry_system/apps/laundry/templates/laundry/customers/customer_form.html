@@ -1,0 +1,67 @@
+{% extends 'laundry/base.html' %}
+{% block title %}{{ title }} - FreshWave{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex align-items-center gap-3">
+        <a href="{% url 'customer_list' %}" class="btn btn-secondary btn-sm"><i class="bi bi-arrow-left"></i></a>
+        <h2>{{ title }}</h2>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-body" style="padding:28px;">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Full Name <span style="color:var(--danger);">*</span></label>
+                            {{ form.name }}
+                            {% if form.name.errors %}
+                            <div style="color:#f87171;font-size:12px;margin-top:4px;"><i class="bi bi-exclamation-circle me-1"></i>{{ form.name.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Phone Number <span style="color:var(--danger);">*</span></label>
+                            {{ form.phone }}
+                            {% if form.phone.errors %}
+                            <div style="color:#f87171;font-size:12px;margin-top:4px;"><i class="bi bi-exclamation-circle me-1"></i>{{ form.phone.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Address <span style="color:var(--danger);">*</span></label>
+                            {{ form.address }}
+                            {% if form.address.errors %}
+                            <div style="color:#f87171;font-size:12px;margin-top:4px;"><i class="bi bi-exclamation-circle me-1"></i>{{ form.address.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Email Address <span style="color:var(--danger);">*</span></label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                            <div style="color:#f87171;font-size:12px;margin-top:4px;"><i class="bi bi-exclamation-circle me-1"></i>{{ form.email.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i>
+                            {% if customer %}Update Customer{% else %}Add Customer{% endif %}
+                        </button>
+                        <a href="{% url 'customer_list' %}" class="btn btn-secondary">Cancel</a>
+                        {% if customer %}
+                        <button type="button" class="btn ms-auto" style="background:rgba(239,68,68,.1);color:var(--danger);border:1px solid rgba(239,68,68,.2);"
+                        data-bs-toggle="modal" data-bs-target="#confirmDeleteModal" data-delete-url="{% url 'customer_delete' customer.customer_number %}" data-delete-type="customer"
+                        data-delete-name="{{ customer.name }}"><i class="bi bi-trash me-1"></i>Delete</button>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

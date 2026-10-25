@@ -1,0 +1,137 @@
+{% extends 'laundry/base.html' %}
+{% block title %}{{ customer.name }} - FreshWave{% endblock %}
+{% block page_title %}Customer Profile{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex align-items-center gap-3">
+        <a href="{% url 'customer_list' %}" class="btn btn-secondary btn-sm"><i class="bi bi-arrow-left"></i></a>
+        <div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <h2>{{ customer.name }}</h2>  
+            </div>
+        </div>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'order_create' %}?customer={{customer.customer_number}}" class="btn btn-primary">
+            <i class="bi bi-plus me-1"></i>New Order
+        </a>
+        <a href="{% url 'customer_edit' customer.customer_number %}" class="btn btn-secondary">
+            <i class="bi bi-pencil me-1"></i>Edit
+        </a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Profile Card -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body text-center" style="padding:30px;">
+                <div style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;margin:0 auto 16px;">
+                    {{ customer.name.0|upper }}
+                </div>
+                <h3 style="font-size:20px;font-weight:700;color:var(--text);">{{ customer.name }}</h3>
+                <div style="margin-top:4px;">
+                </div>
+                {% if customer.email %}
+                <div style="color:var(--text-muted);font-size:14px;">{{ customer.email }}</div>
+                {% endif %}
+
+                <hr class="divider my-3">
+
+                <div class="d-flex flex-column gap-3">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="width:36px;height:36px;background:rgba(0,212,255,.1);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--accent);flex-shrink:0;">
+                            <i class="bi bi-telephone"></i>
+                        </div>
+                        <div style="text-align:left;">
+                            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;">Phone</div>
+                            <div style="font-size:13px;font-weight:500;color:var(--text);">{{ customer.phone }}</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:flex-start;gap:12px;">
+                        <div style="width:36px;height:36px;background:rgba(124,58,237,.1);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--accent2);flex-shrink:0;margin-top:2px;">
+                            <i class="bi bi-geo-alt"></i>
+                        </div>
+                        <div style="text-align:left;">
+                            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;">Address</div>
+                            <div style="font-size:13px;font-weight:600;color:var(--text);">{{ customer.address }}</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="width:36px;height:36px;background:rgba(16,185,129,.1);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--accent3);flex-shrink:0;">
+                            <i class="bi bi-calendar3"></i>
+                        </div>
+                        <div style="text-align:left;">
+                            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;">Customer Since</div>
+                            <div style="font-size:13px;font-weight:600;color:var(--text);">{{ customer.created_at|date:"M d, Y" }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="row g-2 mt-1">
+            <div class="col-6">
+                <div class="stat-card cyan text-center" style="padding:16px;">
+                    <div class="stat-value" style="font-size:22px;">{{ customer.total_orders }}</div>
+                    <div class="stat-label">Total Orders</div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="stat-card green text-center" style="padding:16px;">
+                    <div class="stat-value" style="font-size:22px;">{{ customer.active_orders }}</div>
+                    <div class="stat-label">Active</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order History -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="table-responsive">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="mb-0" style="font-size:16px;font-weight:700;color:var(--text);">Order History</h5>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Order</th>
+                                <th>Services</th>
+                                <th>Status</th>
+                                <th>Amount</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders %}
+                            <tr style="cursor:pointer;" onclick="window.location='/orders/{{order.order_number }}/'">
+                                <td><span style="color:var(--accent);font-weight:600;">#{{ order.order_number }}</span></td>
+                                <td style="font-size:13px;">
+                                    {% for item in order.items.all %}
+                                    <span style="background:var(--surface2);padding:2px 8px;border-radius:5px;font-size:11px;margin-right:3px;">{{ item.service.get_name_display }}</span>
+                                    {% endfor %}
+                                </td>
+                                <td><span class="badge status-{{ order.status }}">{{ order.get_status_display }}</span></td>
+                                <td style="font-weight:600;">₱{{ order.total_amount|floatformat:2 }}</td>
+                                <td style="color:var(--text-muted);font-size:13px;">{{ order.created_at|date:"M d, Y" }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4" style="color:var(--text-muted);">
+                                    No orders yet.
+                                    <a href="{% url 'order_create' %}" style="color:var(--accent);">Create one!</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,88 @@
+/* -------------------------------------------------------------
+    SECTION 1: DAY BREAKDOWN PILLS
+    The 7 day-of-week pills rendered by dashboard.js below the chart.
+   ------------------------------------------------------------- */
+[data-theme="light"] .day-pill {
+    background: #e8f0f8;
+    border-color: #9db1c5;
+}
+
+[data-theme="light"] .day-pill--today {
+    background: rgba(0, 95, 153, 0.12);
+    border-color: rgba(0, 95, 153, 0.28);
+}
+
+[data-theme="light"] .chart-today-highlight {
+    background: rgba(0, 95, 153, 0.08);
+    border-color: rgba(0, 95, 153, 0.18);
+}
+
+/* Wrapper row for the 7 day pills */
+#dayBreakdown {
+    display: flex;
+    gap: 4px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+/* Individual day pill */
+.day-pill {
+    flex: 1;
+    min-width: 36px;
+    text-align: center;
+    padding: 6px 4px;
+    border-radius: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    cursor: default;
+}
+
+/* Today's pill gets accent highlight */
+.day-pill--today {
+    background: rgba(0,212,255,.12);
+    border-color: rgba(0,212,255,.3);
+}
+
+/* Day label inside pill (Mon, Tue…) */
+.day-pill-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+.day-pill--today .day-pill-label { color: var(--accent); }
+
+/* Revenue amount inside pill */
+.day-pill-amount {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+.day-pill--today  .day-pill-amount { color: var(--accent); }
+.day-pill--hasrev .day-pill-amount { color: var(--text); }
+
+/* "★ peak" label on the highest-revenue day */
+.day-pill-peak {
+    font-size: 9px;
+    color: #fbbf24;
+    margin-top: 1px;
+}
+
+/* "today" label at the bottom of today's pill */
+.day-pill-today-label {
+    font-size: 9px;
+    color: var(--accent);
+    margin-top: 1px;
+}
+
+
+/* -------------------------------------------------------------
+    SECTION 2: RECENT ORDERS TABLE DATE COLUMN
+    Date shown inline under customer name on mobile (hidden on desktop).
+   ------------------------------------------------------------- */
+.order-row-date-mobile {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}

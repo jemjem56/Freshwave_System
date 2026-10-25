@@ -1,0 +1,625 @@
+{% extends 'laundry/base.html' %}
+{% load static %}
+{% block title %}Order #{{ order.order_number }} - FreshWave{% endblock %}
+{% block page_title %}Order #{{ order.order_number }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+        <a href="{% url 'order_list' %}" class="btn btn-secondary btn-sm"><i class="bi bi-arrow-left"></i></a>
+        <div>
+            <h2>Order<span style="color:var(--accent);"> {{ order.customer.name }}</span></h2>
+            <div style="font-size:13px;color:var(--text-muted);">Tracking ID: <strong>{{ order.tracking_id }}</strong>
+            </div>
+            <div style="font-size:13px;color:var(--text-muted);">{{ order.created_at|date:"F d, Y - g:i A" }}
+            </div>
+        </div>
+    </div>
+    <div class="d-flex gap-2 align-items-center flex-wrap">
+        <form method="post" style="margin:0;">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="send_notification">
+            <button type="submit" class="btn btn-sm" style="background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.3);font-size:13px;padding:6px 12px;"
+                {% if order.status != 'ready' %}disabled{% endif %}>
+                <i class="bi bi-bell-fill me-1"></i>
+            </button>
+        </form>
+        <span class="badge status-{{ order.status }}" style="font-size:13px;padding:8px 14px;">{{ order.get_status_display }}</span>
+        <button onclick="openReceipt()" class="btn btn-sm" style="background:rgba(0,212,255,.1);color:var(--accent);border:1px solid rgba(0,212,255,.25);">View Receipt</button>
+        <button type="button" class="btn btn-sm btn-soft-danger" title="Delete" data-bs-toggle="modal" data-bs-target="#confirmDeleteModal"
+        data-delete-url="{% url 'order_delete' order.order_number %}" data-delete-type="order" data-delete-name="Order #{{ order.order_number }}"><i class="bi bi-trash"></i>
+        </button>
+    </div>
+</div>
+
+<div class="row g-3">
+    <!-- Right Column shows on top in mobile -->
+    <div class="col-lg-4 order-right">
+        <!-- CUSTOMER INFO -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0" style="font-size:15px;font-weight:700;color:var(--text);">Customer</h5>
+            </div>
+            <div class="card-body">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+                    <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;color:var(--text);justify-content:center;font-weight:800;font-size:18px;flex-shrink:0;">
+                        {{ order.customer.name.0|upper }}
+                    </div>
+                    <div>
+                        <div style="font-weight:700;font-size:15px;color:var(--text);">{{ order.customer.name }}</div>
+                        <div style="font-size:13px;color:var(--text-muted);">{{ order.customer.phone }}</div>
+                    </div>
+                </div>
+                <div style="font-size:13px;color:var(--text-muted);">{{ order.customer.address }}</div>
+                <a href="{% url 'customer_detail' order.customer.customer_number %}" class="btn btn-secondary btn-sm mt-3 w-100">
+                    <i class="bi bi-person me-1"></i>View Profile</a>
+            </div>
+        </div>
+        <!-- UPDATE STATUS -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0" style="font-size:15px;font-weight:700;color:var(--text);">Update Status</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="update_status">
+                    {{ status_form.status }}
+                    <button type="submit" class="btn btn-primary w-100 mt-3">
+                        <i class="bi bi-arrow-repeat me-1"></i>Update Status
+                    </button>
+                </form>
+
+                <div class="d-flex flex-column gap-2 mt-3">
+                    {% if order.status == 'received' %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_status">
+                        <input type="hidden" name="status" value="washing">
+                        <button type="submit" class="btn btn-sm w-100" style="background:rgba(59,130,246,.15);color:#60a5fa;border:1px solid rgba(59,130,246,.3);">
+                            <i class="bi bi-arrow-right-circle me-1"></i>Start Washing
+                        </button>
+                    </form>
+                    {% elif order.status == 'washing' %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_status">
+                        <input type="hidden" name="status" value="drying">
+                        <button type="submit" class="btn btn-sm w-100" style="background:rgba(245,158,11,.15);color:#fbbf24;border:1px solid rgba(245,158,11,.3);">
+                            <i class="bi bi-arrow-right-circle me-1"></i>Move to Drying
+                        </button>
+                    </form>
+                    {% elif order.status == 'drying' %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_status">
+                        <input type="hidden" name="status" value="folding">
+                        <button type="submit" class="btn btn-sm w-100" style="background:rgba(167,139,250,.15);color:#a78bfa;border: 1px solid rgba(167,139,250,.2);">
+                            <i class="bi bi-arrow-right-circle me-1"></i>Move to Folding
+                        </button>
+                    </form>
+                    {% elif order.status == 'folding' %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_status">
+                        <input type="hidden" name="status" value="ready">
+                        <button type="submit" class="btn btn-sm w-100" style="background: rgba(16,185,129,.15);color: var(--accent3);border: 1px solid rgba(16,185,129,.3);">
+                            <i class="bi bi-check-circle me-1"></i>Mark Ready for Pickup
+                        </button>
+                    </form>
+                    {% elif order.status == 'ready' %}
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_status">
+                        <input type="hidden" name="status" value="completed">
+                        <button type="submit" class="btn btn-success btn-sm w-100">
+                            <i class="bi bi-bag-check me-1"></i>Mark as Completed
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <!-- ORDER TIMELINE / TRACKING PROGRESS -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0" style="font-size:15px;font-weight:700;color:var(--text);">Progress</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-step {% if order.status == 'received' %}active{% elif order.status in 'washing,drying,folding,ready,completed' %}done{% endif %}">
+                        <div class="timeline-label">Received</div>
+                    </div>
+                    <div class="timeline-step {% if order.status == 'washing' %}active{% elif order.status == 'drying' or order.status == 'folding' or order.status == 'ready' or order.status == 'completed' %}done{% endif %}">
+                        <div class="timeline-label">Washing</div>
+                    </div>
+                    <div class="timeline-step {% if order.status == 'drying' %}active{% elif order.status == 'folding' or order.status == 'ready' or order.status == 'completed' %}done{% endif %}">
+                        <div class="timeline-label">Drying</div>
+                    </div>
+                    <div class="timeline-step {% if order.status == 'folding' %}active{% elif order.status == 'ready' or order.status == 'completed' %}done{% endif %}">
+                        <div class="timeline-label">Folding</div>
+                    </div>
+                    <div class="timeline-step {% if order.status == 'ready' %}active{% elif order.status == 'completed' %}done{% endif %}">
+                        <div class="timeline-label">Ready for Pickup</div>
+                    </div>
+                    <div class="timeline-step {% if order.status == 'completed' %}done{% endif %}">
+                        <div class="timeline-label">Completed</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Left Column -->
+    <div class="col-lg-8">
+        <!-- ORDER ITEMS -->
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="mb-0" style="font-size:16px;font-weight:700;color:var(--text);">Order Items</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Service</th>
+                                <th class="text-center">Price/kg</th>
+                                <th class="text-center">Qty / Weight</th>
+                                <th class="text-end">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.items.all %}
+                            <tr>
+                                <td><div style="font-weight:600;">{{ item.service.get_name_display }}</div></td>
+                                <td class="text-center">₱{{ item.service.price }}</td>
+                                <td class="text-center">{{ item.quantity }} kg</td>
+                                <td class="text-end" style="font-weight:700;color:var(--accent);">₱{{ item.subtotal|floatformat:2 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center py-3" style="color:var(--text-muted);">No services added.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" style="font-weight:700;text-align:right;padding:14px 16px;">Total</td>
+                                <td class="text-end" style="font-weight:800;font-size:18px;color:var(--accent);padding:14px 16px;">₱{{ order.total_amount|floatformat:2 }}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <h5 class="mb-0" style="font-size:16px;font-weight:700;color:var(--text);">Payment History</h5>
+                <div style="font-size:13px;color:var(--text);">
+                    Balance:
+                    <span class="{% if order.balance <= 0 %}text-paid{% else %}text-unpaid{% endif %}">
+                        ₱{{ order.balance|floatformat:2 }}
+                    </span>
+                </div>
+            </div>
+            <div class="card-body">
+                {% for payment in order.payments.all %}
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:12px;background:var(--surface2);border-radius:10px;margin-bottom:8px;border:1px solid var(--border);">
+                    <div>
+                        <div style="font-weight:600;font-size:14px;color:var(--text);">₱{{ payment.amount|floatformat:2 }}</div>
+                        <div style="font-size:12px;color:var(--text-muted);">{{ payment.get_method_display }} • {{ payment.paid_at|date:"M d, Y g:i A" }}</div>
+                        {% if payment.reference_no %}
+                        <div style="font-size:11px;color:var(--text-muted);">Ref: {{ payment.reference_no }}</div>
+                        {% endif %}
+                    </div>
+                    {% if order.is_paid %}
+                        <span class="badge status-paid">Paid</span>
+                    {% elif order.amount_paid > 0 %}
+                        <span class="badge status-partial">Partial</span>
+                    {% else %}
+                        <span class="badge status-pending">Unpaid</span>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <div style="color:var(--text-muted);font-size:14px;text-align:center;padding:16px;">No payments recorded yet.</div>
+                {% endfor %}
+
+                {% if order.balance > 0 %}
+                <div style="margin-top:16px;padding:18px;background:rgba(0,212,255,.04);border:1px solid rgba(0,212,255,.15);border-radius:12px;">
+                    <h6 style="font-size:14px;font-weight:700;margin-bottom:14px;color:var(--accent);">Record Payment</h6>
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="add_payment">
+                        <div class="row g-2 payment-row">
+                            <div class="col-12 col-sm-4">
+                                <label class="form-label">Amount</label>
+                                {{ payment_form.amount }}
+                            </div>
+                            <div class="col-12 col-sm-4">
+                                <label class="form-label">Method</label>
+                                {{ payment_form.method }}
+                            </div>
+                            <div class="col-12 col-sm-4">
+                                <label class="form-label">Reference No.</label>
+                                {{ payment_form.reference_no }}
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-sm mt-3 w-100">
+                            <i class="bi bi-check-circle me-1"></i>Record Payment
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if order.notes %}
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0" style="font-size:15px;font-weight:700;color:var(--text);">Notes</h5>
+            </div>
+            <div class="card-body">
+                <p style="color:var(--text-muted);font-size:14px;margin:0;">{{ order.notes }}</p>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- SCREEN MODAL -->
+<div id="receiptModal" class="receipt-modal">
+    <div class="receipt-modal-card">
+        <button type="button" onclick="closeReceipt()" class="receipt-close-btn"><i class="bi bi-x-lg"></i></button>
+        <div id="receiptContent" class="receipt-content-wrap">
+            <div class="receipt-shop-header">
+                <div class="receipt-logo">
+                    <img src="{% static 'laundry/IMG/newlogo.png' %}" alt="FreshWave Logo">
+                </div>
+                <div class="receipt-brand-name">FreshWave</div>
+                <div class="receipt-brand-sub">Laundry Management</div>
+                <div class="receipt-official-badge">Official Receipt</div>
+            </div>
+            <div class="receipt-dashed-divider"></div>
+            <div class="receipt-top-row">
+                <div>
+                    <div class="receipt-mini-label">Receipt No.</div>
+                    <div class="receipt-order-number">#{{ order.order_number }}</div>
+                </div>
+                <div class="receipt-date-issued">
+                    <div class="receipt-mini-label">Date Issued</div>
+                    <div class="receipt-date-main">{{ order.created_at|date:"M d, Y" }}</div>
+                    <div class="receipt-date-sub">{{ order.created_at|date:"g:i A" }}</div>
+                </div>
+            </div>
+            
+            <div class="receipt-section-box">
+                <div class="receipt-section-label">Customer Details</div>
+                <div class="receipt-customer-row">
+                    {% comment %} <div class="receipt-customer-avatar">{{ order.customer.name.0|upper }}</div> {% endcomment %}
+                    <div>
+                        <div class="receipt-customer-name">{{ order.customer.name }}</div>
+                        <div class="receipt-customer-meta">{{ order.customer.phone }}</div>
+                        {% if order.customer.address %}
+                        <div class="receipt-customer-meta receipt-customer-meta-sm">{{ order.customer.address }}</div>
+                        {% endif %}
+                        {% if order.customer.email %}
+                        <div class="receipt-customer-meta receipt-customer-meta-sm">{{ order.customer.email }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="receipt-section-box">
+                <div class="receipt-section-label">Order Information</div>
+                <div class="receipt-info-list">
+                    <div class="receipt-info-row">
+                        <span class="receipt-info-key">Order Number</span>
+                        <span class="receipt-info-value receipt-info-value-accent">#{{ order.order_number }}</span>
+                    </div>
+                    <div class="receipt-info-row">
+                        <span class="receipt-info-key">Status</span>
+                        <span class="badge status-{{ order.status }} receipt-status-badge">{{ order.get_status_display }}</span>
+                    </div>
+                    <div class="receipt-info-row">
+                        <span class="receipt-info-key">Weight</span>
+                        <span class="receipt-info-value">{{ order.weight_kg }} kg</span>
+                    </div>
+                    {% if order.pickup_date %}
+                    <div class="receipt-info-row">
+                        <span class="receipt-info-key">Pickup Date</span>
+                        <span class="receipt-info-value">{{ order.pickup_date|date:"M d, Y g:i A" }}</span>
+                    </div>
+                    {% endif %}
+                    {% if order.notes %}
+                    <div class="receipt-info-row receipt-info-row-notes">
+                        <span class="receipt-info-key receipt-info-key-fixed">Notes</span>
+                        <span class="receipt-info-value">{{ order.notes }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="receipt-dashed-divider receipt-dashed-divider-sm"></div>
+
+            <div class="receipt-services-block">
+                <div class="receipt-section-label">Services Availed</div>
+                {% for item in order.items.all %}
+                <div class="receipt-service-item">
+                    <div>
+                        <div class="receipt-service-name">{{ item.service.get_name_display }}</div>
+                        {% if item.service.description %}
+                        <div class="receipt-service-desc">{{ item.service.description }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="receipt-service-price">₱{{ item.subtotal|floatformat:2 }}</div>
+                </div>
+                {% empty %}
+                <div class="receipt-empty-text">No services recorded.</div>
+                {% endfor %}
+            </div>
+
+            <div class="receipt-total-panel">
+                <div class="receipt-money-row">
+                    <span class="receipt-money-label">Subtotal</span>
+                    <span class="receipt-money-value">₱{{ order.total_amount|floatformat:2 }}</span>
+                </div>
+                <div class="receipt-money-row">
+                    <span class="receipt-money-label">Amount Paid</span>
+                    <span class="receipt-money-value receipt-money-paid">₱{{ order.amount_paid|floatformat:2 }}</span>
+                </div>
+                {% if order.balance > 0 %}
+                <div class="receipt-money-row receipt-money-row-gap">
+                    <span class="receipt-money-label">Remaining Balance</span>
+                    <span class="receipt-money-value receipt-money-balance">₱{{ order.balance|floatformat:2 }}</span>
+                </div>
+                {% endif %}
+                <div class="receipt-grand-total">
+                    <span class="receipt-grand-total-label">TOTAL</span>
+                    <span class="receipt-grand-total-value">₱{{ order.total_amount|floatformat:2 }}</span>
+                </div>
+            </div>
+
+            {% if order.payments.all %}
+            <div class="receipt-payments-block">
+                <div class="receipt-section-label">Payment History</div>
+                {% for payment in order.payments.all %}
+                <div class="receipt-payment-card">
+                    <div>
+                        <div class="receipt-payment-method">{{ payment.get_method_display }}</div>
+                        <div class="receipt-payment-date">{{ payment.paid_at|date:"M d, Y · g:i A" }}</div>
+                        {% if payment.reference_no %}
+                        <div class="receipt-payment-ref">Ref: {{ payment.reference_no }}</div>
+                        {% endif %}
+                        {% if not order.is_paid %}
+                        <div class="receipt-partial-badge">Partial</div>
+                        {% endif %}
+                    </div>
+                    <div class="receipt-payment-amount">₱{{ payment.amount|floatformat:2 }}</div>
+                </div>
+                {% endfor %}
+
+                {% if order.balance > 0 %}
+                <div class="receipt-balance-reminder">
+                    <span class="receipt-money-label">Still to pay</span>
+                    <span class="receipt-money-value receipt-money-balance">₱{{ order.balance|floatformat:2 }}</span>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <div class="receipt-dashed-divider"></div>
+
+            <div class="receipt-status-wrap">
+                {% if order.is_paid %}
+                <div class="receipt-payment-status receipt-payment-status-paid">
+                    <i class="bi bi-check-circle-fill"></i>
+                    FULLY PAID
+                </div>
+                {% elif order.amount_paid > 0 %}
+                <div class="receipt-payment-status receipt-payment-status-partial">
+                    <i class="bi bi-exclamation-circle-fill"></i>
+                    PARTIALLY PAID
+                </div>
+                {% else %}
+                <div class="receipt-payment-status receipt-payment-status-unpaid">
+                    <i class="bi bi-x-circle-fill"></i>
+                    UNPAID
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="receipt-footer-block">
+                <div class="receipt-footer-main">Thank you for choosing FreshWave Laundry!</div>
+                <div class="receipt-footer-sub">This is your official receipt. Please keep it for your records.</div>
+                <div class="receipt-footer-generated">
+                    Generated {{ order.created_at|date:"M d, Y" }} · FreshWave Laundry System
+                </div>
+            </div>
+        </div>
+
+        <div class="receipt-actions-bar">
+            <button type="button" onclick="printReceipt()" class="btn btn-primary receipt-action-btn">
+                <i class="bi bi-printer me-1"></i>Print Receipt
+            </button>
+            <button type="button" onclick="downloadReceipt()" class="btn btn-secondary receipt-action-btn">
+                <i class="bi bi-download me-1"></i>Save as PDF
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- PRINT-ONLY RECEIPT -->
+<div id="receiptPrintArea" data-receipt-print style="display:none;">
+    <div data-receipt-paper>
+        <div class="receipt-content-wrap" data-print-content>
+            <div class="receipt-shop-header">
+                <div class="receipt-logo">
+                    <img src="{% static 'laundry/IMG/newlogo.png' %}" alt="FreshWave Logo">
+                </div>
+                <div class="receipt-brand-name">FreshWave</div>
+                <div class="receipt-brand-sub">Laundry Management</div>
+                <div class="receipt-official-badge">Official Receipt</div>
+            </div>
+
+            <div class="receipt-dashed-divider"></div>
+
+            <div class="receipt-top-row">
+                <div>
+                    <div class="receipt-mini-label">Receipt No.</div>
+                    <div class="receipt-order-number">#{{ order.order_number }}</div>
+                </div>
+                <div class="receipt-date-issued">
+                    <div class="receipt-mini-label">Date Issued</div>
+                    <div class="receipt-date-main">{{ order.created_at|date:"M d, Y" }}</div>
+                    <div class="receipt-date-sub">{{ order.created_at|date:"g:i A" }}</div>
+                </div>
+            </div>
+
+            <div class="receipt-section-box">
+                <div class="receipt-section-label">Customer Details</div>
+                <div class="receipt-customer-row">
+                    {% comment %} <div class="receipt-customer-avatar">{{ order.customer.name.0|upper }}</div> {% endcomment %}
+                    <div>
+                        <div class="receipt-customer-name">{{ order.customer.name }}</div>
+                        <div class="receipt-customer-meta">{{ order.customer.phone }}</div>
+                        {% if order.customer.address %}
+                        <div class="receipt-customer-meta receipt-customer-meta-sm">{{ order.customer.address }}</div>
+                        {% endif %}
+                        {% if order.customer.email %}
+                        <div class="receipt-customer-meta receipt-customer-meta-sm">{{ order.customer.email }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="receipt-section-box">
+                <div class="receipt-section-label">Order Information</div>
+                <div class="receipt-info-list">
+                    <div class="receipt-info-row">
+                        <span class="receipt-info-key">Order Number</span>
+                        <span class="receipt-info-value receipt-info-value-accent">#{{ order.order_number }}</span>
+                    </div>
+                    <div class="receipt-info-row">
+                        <span class="receipt-info-key">Status</span>
+                        <span class="badge status-{{ order.status }} receipt-status-badge">{{ order.get_status_display }}</span>
+                    </div>
+                    <div class="receipt-info-row">
+                        <span class="receipt-info-key">Weight</span>
+                        <span class="receipt-info-value">{{ order.weight_kg }} kg</span>
+                    </div>
+                    {% if order.pickup_date %}
+                    <div class="receipt-info-row">
+                        <span class="receipt-info-key">Pickup Date</span>
+                        <span class="receipt-info-value">{{ order.pickup_date|date:"M d, Y g:i A" }}</span>
+                    </div>
+                    {% endif %}
+                    {% if order.notes %}
+                    <div class="receipt-info-row receipt-info-row-notes">
+                        <span class="receipt-info-key receipt-info-key-fixed">Notes</span>
+                        <span class="receipt-info-value">{{ order.notes }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="receipt-dashed-divider receipt-dashed-divider-sm"></div>
+
+            <div class="receipt-services-block">
+                <div class="receipt-section-label">Services Availed</div>
+                {% for item in order.items.all %}
+                <div class="receipt-service-item">
+                    <div>
+                        <div class="receipt-service-name">{{ item.service.get_name_display }}</div>
+                        {% if item.service.description %}
+                        <div class="receipt-service-desc">{{ item.service.description }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="receipt-service-price">₱{{ item.subtotal|floatformat:2 }}</div>
+                </div>
+                {% empty %}
+                <div class="receipt-empty-text">No services recorded.</div>
+                {% endfor %}
+            </div>
+
+            <div class="receipt-total-panel">
+                <div class="receipt-money-row">
+                    <span class="receipt-money-label">Subtotal</span>
+                    <span class="receipt-money-value">₱{{ order.total_amount|floatformat:2 }}</span>
+                </div>
+                <div class="receipt-money-row">
+                    <span class="receipt-money-label">Amount Paid</span>
+                    <span class="receipt-money-value receipt-money-paid">₱{{ order.amount_paid|floatformat:2 }}</span>
+                </div>
+                {% if order.balance > 0 %}
+                <div class="receipt-money-row receipt-money-row-gap">
+                    <span class="receipt-money-label">Remaining Balance</span>
+                    <span class="receipt-money-value receipt-money-balance">₱{{ order.balance|floatformat:2 }}</span>
+                </div>
+                {% endif %}
+                <div class="receipt-grand-total">
+                    <span class="receipt-grand-total-label">TOTAL</span>
+                    <span class="receipt-grand-total-value">₱{{ order.total_amount|floatformat:2 }}</span>
+                </div>
+            </div>
+
+            {% if order.payments.all %}
+            <div class="receipt-payments-block">
+                <div class="receipt-section-label">Payment History</div>
+                {% for payment in order.payments.all %}
+                <div class="receipt-payment-card">
+                    <div>
+                        <div class="receipt-payment-method">{{ payment.get_method_display }}</div>
+                        <div class="receipt-payment-date">{{ payment.paid_at|date:"M d, Y · g:i A" }}</div>
+                        {% if payment.reference_no %}
+                        <div class="receipt-payment-ref">Ref: {{ payment.reference_no }}</div>
+                        {% endif %}
+                        {% if not order.is_paid %}
+                        <div class="receipt-partial-badge">Partial</div>
+                        {% endif %}
+                    </div>
+                    <div class="receipt-payment-amount">₱{{ payment.amount|floatformat:2 }}</div>
+                </div>
+                {% endfor %}
+
+                {% if order.balance > 0 %}
+                <div class="receipt-balance-reminder">
+                    <span class="receipt-money-label">Still to pay</span>
+                    <span class="receipt-money-value receipt-money-balance">₱{{ order.balance|floatformat:2 }}</span>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <div class="receipt-dashed-divider"></div>
+
+            <div class="receipt-status-wrap">
+                {% if order.is_paid %}
+                <div class="receipt-payment-status receipt-payment-status-paid">
+                    <i class="bi bi-check-circle-fill"></i>
+                    FULLY PAID
+                </div>
+                {% elif order.amount_paid > 0 %}
+                <div class="receipt-payment-status receipt-payment-status-partial">
+                    <i class="bi bi-exclamation-circle-fill"></i>
+                    PARTIALLY PAID
+                </div>
+                {% else %}
+                <div class="receipt-payment-status receipt-payment-status-unpaid">
+                    <i class="bi bi-x-circle-fill"></i>
+                    UNPAID
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="receipt-footer-block">
+                <div class="receipt-footer-main">Thank you for choosing FreshWave Laundry!</div>
+                <div class="receipt-footer-sub">This is your official receipt. Please keep it for your records.</div>
+                <div class="receipt-footer-generated">
+                    Generated {{ order.created_at|date:"M d, Y" }} · FreshWave Laundry System
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
